@@ -8,8 +8,16 @@ version '1.0-SNAPSHOT'
 repositories {
     mavenCentral()
 }
-
+ext{
+    lombokVersion = '1.18.22'
+}
 dependencies {
+    implementation("org.apache.poi:poi:5.0.0")
+    implementation("org.apache.poi:poi-ooxml:5.0.0")
+    implementation("commons-io:commons-io:2.11.0")
+    implementation 'com.github.javafaker:javafaker:1.0.2'
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }

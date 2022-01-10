@@ -41,8 +41,8 @@ public class ContractorStringSercher {
             result = contractorString.split("ИП ")[1];
             result = result.replaceAll("\\.", "\\s");
             result = result.split(" ")[0];
-        } else if (contractorString.toLowerCase().contains("индивидуальный предприниматель\s")) {
-            result = contractorString.toLowerCase().split("индивидуальный предприниматель\s")[1];
+        } else if (contractorString.toLowerCase().contains("индивидуальный предприниматель ")) {
+            result = contractorString.toLowerCase().split("индивидуальный предприниматель ")[1];
             result = result.replaceAll("\\.", "\\s");
             result = result.split(" ")[0];
         } else {
