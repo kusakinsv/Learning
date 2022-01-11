@@ -5,6 +5,8 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -20,8 +22,13 @@ public class ConcurrentXLSXExportService<Data> {
 
         @SneakyThrows
         public void exportToExcelFile(List<Data> data) {
-            String path = "C:\\Coding\\Java\\Projects\\Learning\\output\\textExport.xlsx";
-            OutputStream os2 = new FileOutputStream(path); //дома
+            if (data.size() == 0) throw new InvalidObjectException("The exported List of objects is empty");
+//            String path = "C:\\Coding\\Java\\Projects\\Learning\\output\\textExport.xlsx";
+//            OutputStream os2 = new FileOutputStream(path); //дома
+            Path applicationPath = Paths.get("").toAbsolutePath();
+            String path = String.valueOf(applicationPath + "\\export-service\\tmp\\textExport.csv");
+            OutputStream tmpFile = new FileOutputStream(path); //дома
+            OutputStream os2 = new FileOutputStream(String.valueOf(tmpFile)); //дома
             Workbook createWorkbook = new XSSFWorkbook();
             Sheet createSheet = createWorkbook.createSheet("Тест Выгрузка");
             createWorkbook.write(os2);
@@ -29,9 +36,24 @@ public class ConcurrentXLSXExportService<Data> {
             os2.close();
             System.out.printf("Количество записей: %s \n", data.size());
 
+            int countPerThread = 10000; //optional
+            int countForThisThread = countPerThread;
+            int leftover = 0;
+            int  counter = data.size();
+            int counterofThreads = 1;
+            if (counter <= countPerThread) {
+                countForThisThread = counter;}
+            if (counter > countPerThread) {
+                if ((counter%countPerThread) !=0) {
+                    leftover = counter % countPerThread;
+                    counterofThreads  = (counter - leftover) / countPerThread;
+                    if (leftover > 0) counterofThreads  = counterofThreads +1;
+                } else {
+                    counterofThreads  = counter/countPerThread;}
+            }
+
             File file = File.createTempFile("tmp", ".tmp");
-            if (data.size() == 0) throw new InvalidObjectException("The exported List of objects is empty");
-            int counterofThreads = 3;
+
 //            if (data.size() > 5000)  counterofThreads = data.size()/5000;
             var fieldsNames = Arrays.stream(data.get(0).getClass().getDeclaredFields()).collect(Collectors.toList());
             List<Thread> threads = new ArrayList<>();
@@ -40,19 +62,15 @@ public class ConcurrentXLSXExportService<Data> {
             Workbook workbook = new XSSFWorkbook(data1file);
             Sheet sheet = workbook.getSheetAt(0);
 
-            for (int i = 0, j = 0; i < counterofThreads; i++, j += 2) {
-                System.out.println("j=" + j);
-                int finalJ = j;
-                int jPlus2 = j+2;
+            for (int i = 0; i < counterofThreads; i++) {
                 int finalI = i;
-
-
-                Thread t = new Thread(new Runnable() {
+                int counterOFRecords = i*countPerThread;
+                Thread thread = new Thread(new Runnable() {
                     @SneakyThrows
                     @Override
                     public void run() {
-                        synchronized (data) {
-                            for (int i = finalJ; i < jPlus2; i++) {
+                            StringBuffer s = new StringBuffer("");
+                            for (int i = counterOFRecords; i < counterOFRecords+countPerThread; i++) {
 //                                Row dataRow = sheet.createRow(i+1);// С заголовком
                                 Row dataRow = sheet.createRow(i);
                                 for (int y = 0; y < fieldsNames.size(); y++) {
@@ -74,11 +92,12 @@ public class ConcurrentXLSXExportService<Data> {
                                     } else dataRow.getCell(y).setCellValue(value.toString());
                                 }
                             }
-                        }
 //                        for (int i = 0; i < fieldsNumber; i++) {
 //                            sheet.autoSizeColumn(i);
 //                        }
-                        if (finalI !=0)threads.get(finalI-1).join();
+                        if (finalI > 0) { Thread joiningThread = threads.get(finalI -1);
+                            System.out.println("Wait: " + (finalI-1) + " " + Thread.currentThread().getName());
+                            joiningThread.join();}
                         OutputStream os = new FileOutputStream(path); //дома
                         System.out.println(threads.size());
 
@@ -87,9 +106,9 @@ public class ConcurrentXLSXExportService<Data> {
                         os.close();
                     }
                 }, String.format("Thread-%s", i));
-                threads.add(t);
-                t.start();
-                System.out.printf("%s Started \n", t.getName());
+                threads.add(thread);
+                thread.start();
+                System.out.printf("%s Started \n", thread.getName());
 
 
             }
