@@ -36,7 +36,7 @@ public class XlsxExportServiceTestFunc<Data> {
     public ByteArrayInputStream exportToExcelFile(List<Data> data, Map<String, String> metadata) throws InvalidObjectException {
         if (data.size()==0) throw new InvalidObjectException("The exported List of objects is empty");
         else if (data.size() > 1048574) throw new IllegalArgumentException("XLSX format supports maximum 1048575 values");
-        object = data.get(0);
+        object = data.get(data.size()-1);
         try (Workbook workbook = new SXSSFWorkbook()) {
 
             Sheet sheet = workbook.createSheet(sheetTitle);
@@ -94,52 +94,13 @@ public class XlsxExportServiceTestFunc<Data> {
     public ByteArrayInputStream exportToExcelFile(List<Data> data) throws InvalidObjectException, NoSuchFieldException, IllegalAccessException {
         if (data.size()==0) throw new InvalidObjectException("The exported List of objects is empty");
         else if (data.size() > 1048574) throw new IllegalArgumentException("XLSX format supports maximum 1048575 values");
-        object = data.get(0);
-        var fieldsNames = Arrays.stream(data.get(0).getClass().getDeclaredFields()).collect(Collectors.toList());
+        object = data.get(data.size()-1);
+        var fieldsNames = Arrays.stream(object.getClass().getDeclaredFields()).collect(Collectors.toList());
 
-        XSSFWorkbook sizeSetterworkbook = new XSSFWorkbook();
-        Sheet sizeSetterSheet = sizeSetterworkbook.createSheet(sheetTitle);
-        Row sizeSetterRow = sizeSetterSheet.createRow(0);
-
-        for (int i = 0; i < fieldsNames.size(); i++) {
-            sizeSetterRow.createCell(i);
-            String fieldNameForSearch = fieldsNames.get(i).getName();
-            var field = object.getClass().getDeclaredField(fieldNameForSearch);
-            field.setAccessible(true);
-            var value = field.get(object);
-            if (value instanceof Number) {
-                sizeSetterRow.getCell(i).setCellValue(((Number) value).doubleValue());
-            } else if (value instanceof String) {
-                sizeSetterRow.getCell(i).setCellValue((String) value);
-            } else if (value instanceof Boolean) {
-                sizeSetterRow.getCell(i).setCellValue((Boolean) value);
-            } else if (value instanceof LocalDateTime) {
-                sizeSetterRow.getCell(i).setCellValue(((LocalDateTime) value).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")));
-            } else if (value instanceof LocalDate) {
-                sizeSetterRow.getCell(i).setCellValue(((LocalDate) value).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
-            } else sizeSetterRow.getCell(i).setCellValue(value.toString());
-            sizeSetterSheet.autoSizeColumn(i);
-        }
-
-
-        try (Workbook workbook = new SXSSFWorkbook(sizeSetterworkbook)) {
+        try (Workbook workbook = new SXSSFWorkbook(sizeSetterPhantomWorkbook())) {
             Sheet sheet = workbook.getSheetAt(0);
 
-//            Row row = sheet.createRow(0);
-            Font font = workbook.createFont();
-            font.setBold(true);
-            CellStyle headerCellStyle = workbook.createCellStyle();
-            headerCellStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-            headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-            headerCellStyle.setFont(font);
-
-//            var fieldsNames = Arrays.stream(data.get(0).getClass().getDeclaredFields()).collect(Collectors.toList());
-//            for (int i = 0; i < fieldsNames.size(); i++) {
-//                row.createCell(i);
-//                row.getCell(i).setCellValue(firstUpperCase(fieldsNames.get(i).getName()));
-//                row.getCell(i).setCellStyle(headerCellStyle);;
-//            }
-            for (int i = 1; i < data.size(); i++) {
+            for (int i = 0; i < data.size(); i++) {
                 Row dataRow = sheet.createRow(i + 1);
                 for (int y = 0; y < fieldsNames.size(); y++) {
                     dataRow.createCell(y);
@@ -186,5 +147,46 @@ public class XlsxExportServiceTestFunc<Data> {
         else if(word.isEmpty()) return word;
         else return word.substring(0, 1).toUpperCase() + word.substring(1);
     }
+
+    private XSSFWorkbook sizeSetterPhantomWorkbook() throws NoSuchFieldException, IllegalAccessException {
+        var fieldsNames = Arrays.stream(object.getClass().getDeclaredFields()).collect(Collectors.toList());
+        XSSFWorkbook sizeSetterworkbook = new XSSFWorkbook();
+        Sheet sizeSetterSheet = sizeSetterworkbook.createSheet(sheetTitle);
+        Row sizeSetterRow = sizeSetterSheet.createRow(0);
+        Font font = sizeSetterworkbook.createFont();
+        font.setBold(true);
+        CellStyle headerCellStyle = sizeSetterworkbook.createCellStyle();
+        headerCellStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerCellStyle.setFont(font);
+
+        for (int i = 0; i < fieldsNames.size(); i++) {
+            sizeSetterRow.createCell(i);
+            String fieldNameForSearch = fieldsNames.get(i).getName();
+            var field = object.getClass().getDeclaredField(fieldNameForSearch);
+            field.setAccessible(true);
+            var value = field.get(object);
+            if (value instanceof Number) {
+                sizeSetterRow.getCell(i).setCellValue(((Number) value).doubleValue());
+            } else if (value instanceof String) {
+                sizeSetterRow.getCell(i).setCellValue((String) value);
+            } else if (value instanceof Boolean) {
+                sizeSetterRow.getCell(i).setCellValue((Boolean) value);
+            } else if (value instanceof LocalDateTime) {
+                sizeSetterRow.getCell(i).setCellValue(((LocalDateTime) value).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")));
+            } else if (value instanceof LocalDate) {
+                sizeSetterRow.getCell(i).setCellValue(((LocalDate) value).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+            } else sizeSetterRow.getCell(i).setCellValue(value.toString());
+            sizeSetterSheet.autoSizeColumn(i, true);
+        }
+
+        for (int i = 0; i < fieldsNames.size(); i++) {
+            sizeSetterRow.createCell(i);
+            sizeSetterRow.getCell(i).setCellValue(firstUpperCase(fieldsNames.get(i).getName()));
+            sizeSetterRow.getCell(i).setCellStyle(headerCellStyle);;
+        }
+        return sizeSetterworkbook;
+    }
+
 }
 
