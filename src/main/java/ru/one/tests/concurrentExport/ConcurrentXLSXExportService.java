@@ -29,13 +29,19 @@ public class ConcurrentXLSXExportService<Data> {
             String path = String.valueOf(applicationPath + "\\export-service\\tmp\\textExport.csv");
             OutputStream tmpFile = new FileOutputStream(path); //дома
             OutputStream os2 = new FileOutputStream(String.valueOf(tmpFile)); //дома
+            //tmp Для записи
+            File newTempfile = File.createTempFile("export-service-tmp", applicationPath.toString());
+
             Workbook createWorkbook = new XSSFWorkbook();
+
+            Workbook buffer = WorkbookFactory.create(File.createTempFile("export-service-tmp", applicationPath.toString()));
+
             Sheet createSheet = createWorkbook.createSheet("Тест Выгрузка");
             createWorkbook.write(os2);
             createWorkbook.close();
+
             os2.close();
             System.out.printf("Количество записей: %s \n", data.size());
-
             int countPerThread = 10000; //optional
             int countForThisThread = countPerThread;
             int leftover = 0;

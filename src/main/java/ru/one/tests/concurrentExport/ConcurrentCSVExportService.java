@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-//todo ТЗ: сделать чтобы выгружал в xlsx(например entity) 1 млн. записей максимально быстро (10 полей)
+//todo : сделать чтобы выгружал в xlsx(например entity) 1 млн. записей максимально быстро (10 полей)
     public class ConcurrentCSVExportService<Data> {
     private Data object;
     private String separator = ";";
@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
             var fieldsNames = Arrays.stream(data.get(0).getClass().getDeclaredFields()).collect(Collectors.toList());
             List<Thread> threads = new ArrayList<>();
             FileInputStream tempFileInputStream = new FileInputStream(tempFile);
-
+            tempFile.delete();
             for (int i = 0; i < counterofThreads; i++) {
 
                 int counterOFRecords = i*countPerThread;
