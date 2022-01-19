@@ -31,26 +31,9 @@ public class XlsxExportService<Data> {
         if (data.size()==0) throw new InvalidObjectException("The exported List of objects is empty");
         else if (data.size() > 1048574) throw new IllegalArgumentException("XLSX format supports maximum 1048575 values, use CSV method");
         object = data.get(0);
-        Set<String> set = metadata.keySet();
-        List<String> one = new ArrayList<>(set);
+        if (metadata.keySet().stream().findFirst().get().startsWith("$")) return jsonPathMetadata(data, metadata);
+        else return simpleMetadata(data, metadata);
 
-//        DocumentContext jsonContext = JsonPath.parse(object);
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(object);
-        DocumentContext jsonContext = JsonPath.parse(json);
-        System.out.println(json.toString());
-        System.out.println("////////////////");
-        int i = 1;
-//        var jsonpathCreatorName = jsonContext.read(one);
-//        var jsonpathCreatorName = jsonContext.read("$.[" +  i + "]");
-        System.out.println(jsonContext.read(one.get(0)).toString());
-        System.out.println(jsonContext.read(one.get(1)).toString());
-        System.out.println(jsonContext.read(one.get(2)).toString());
-
-
-
-
-        return new ByteArrayInputStream(new byte[0]);
     }
 
 
@@ -204,10 +187,35 @@ public class XlsxExportService<Data> {
         return field;
     }
 
-    public String firstUpperCase(String word){
+    private String firstUpperCase(String word){
         if(word == null) return null;
         else if(word.isEmpty()) return word;
         else return word.substring(0, 1).toUpperCase() + word.substring(1);
     }
+
+    private ByteArrayInputStream jsonPathMetadata(List<Data> data, Map<String, String> metadata) throws JsonProcessingException {
+        Set<String> set = metadata.keySet();
+        List<String> one = new ArrayList<>(set);
+
+//        DocumentContext jsonContext = JsonPath.parse(object);
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(object);
+        DocumentContext jsonContext = JsonPath.parse(json);
+        System.out.println(json.toString());
+        System.out.println("////////////////");
+        int i = 1;
+//        var jsonpathCreatorName = jsonContext.read(one);
+//        var jsonpathCreatorName = jsonContext.read("$.[" +  i + "]");
+        System.out.println(jsonContext.read(one.get(0)).toString());
+        System.out.println(jsonContext.read(one.get(1)).toString());
+        System.out.println(jsonContext.read(one.get(2)).toString());
+        return new ByteArrayInputStream(new byte[0]);
+    }
+
+    private ByteArrayInputStream simpleMetadata(List<Data> data, Map<String, String> metadata){
+
+        return new ByteArrayInputStream(new byte[0]);
+    }
+
 }
 
