@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @AllArgsConstructor
-public class DataTwo {
+public class DataTwo extends DataSuper {
     private int id;
     private String name;
     private String surname;

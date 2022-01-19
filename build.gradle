@@ -20,6 +20,7 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    implementation 'com.jayway.jsonpath:json-path:2.6.0'
 }
 
 

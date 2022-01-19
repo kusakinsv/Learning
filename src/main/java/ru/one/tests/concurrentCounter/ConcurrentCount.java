@@ -16,7 +16,7 @@ public class ConcurrentCount<T> {
 
 
 
-void start(){
+void start() {
 //    int counter = amount;
 //    if (counter > 2000) counter = 2000;
 //    if(MAX_OPERATIONS < counter) counter = MAX_OPERATIONS;
@@ -33,14 +33,15 @@ void start(){
 //            if (leftover > 0) countpages = countpages+1;
 //        } else {
 //            countpages = counter/perPage;}
-    }
-
-
+//    }
+//
+//
+//
+//}
+//
+//
+//    public ConcurrentCount(int amount) {
+//        this.amount = amount;
 
 }
-
-
-    public ConcurrentCount(int amount) {
-        this.amount = amount;
-    }
 }

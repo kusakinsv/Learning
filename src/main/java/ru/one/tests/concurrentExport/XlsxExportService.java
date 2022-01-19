@@ -1,13 +1,15 @@
 package ru.one.tests.concurrentExport;
 
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import lombok.SneakyThrows;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.InvalidObjectException;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,12 +25,34 @@ public class XlsxExportService<Data> {
     public XlsxExportService() throws FileNotFoundException {
     }
 
+    public ByteArrayInputStream exportToExcelFileJson(List<Data> data, Map<String, String> metadata) throws InvalidObjectException {
+        if (data.size()==0) throw new InvalidObjectException("The exported List of objects is empty");
+        else if (data.size() > 1048574) throw new IllegalArgumentException("XLSX format supports maximum 1048575 values, use CSV method");
+        object = data.get(0);
+        Set set = metadata.keySet();
+        String one = (String)set.iterator().next();
+        System.out.println(one);
+
+        DocumentContext jsonContext = JsonPath.parse(object);
+        System.out.println(jsonContext);
+        int i = 0;
+        var jsonpathCreatorName = jsonContext.read("$.*");
+        System.out.println(jsonpathCreatorName);
+
+
+
+
+        return new ByteArrayInputStream(new byte[0]);
+    }
+
+
     @SneakyThrows
     public ByteArrayInputStream exportToExcelFile(List<Data> data, Map<String, String> metadata) {
         if (data.size()==0) throw new InvalidObjectException("The exported List of objects is empty");
+        else if (data.size() > 1048574) throw new IllegalArgumentException("XLSX format supports maximum 1048575 values");
         object = data.get(0);
-        try (Workbook workbook = new XSSFWorkbook()) {
-
+        try (Workbook workbook = new SXSSFWorkbook()) {
+            List<Field> fieldList = new ArrayList<>();
             Sheet sheet = workbook.createSheet(EVENT_SHEET_TITLE);
             Row row = sheet.createRow(0);
             Font font = workbook.createFont();
@@ -53,8 +77,13 @@ public class XlsxExportService<Data> {
                 Row dataRow = sheet.createRow(i + 1);
                 for (int y = 0; y < fieldsNames.size(); y++) {
                     dataRow.createCell(y);
-                    String fieldNameForSearch = fieldsNames.get(y).getName();
-                    var field = data.get(i).getClass().getDeclaredField(fieldNameForSearch);
+                    var fieldNameForSearch = fieldsNames.get(y);
+                    Class<?> classWhereFindField = data.get(i).getClass();
+                    while(classWhereFindField.getSuperclass()!=null){
+                        fieldList.addAll(Arrays.asList(classWhereFindField.getDeclaredFields()));
+                        classWhereFindField = classWhereFindField.getSuperclass();
+                    }
+                    var field = fieldList.get(fieldList.indexOf(fieldNameForSearch));
                     field.setAccessible(true);
                     var value = field.get(data.get(i));
                     if (value instanceof Number) {
@@ -68,21 +97,27 @@ public class XlsxExportService<Data> {
                     } else if (value instanceof LocalDate) {
                         dataRow.getCell(y).setCellValue(((LocalDate) value).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
                     } else dataRow.getCell(y).setCellValue(value.toString());
+                    fieldList.clear();
                 }
             }
-            for (int i = 0; i < fieldsNames.size(); i++) {
-                sheet.autoSizeColumn(i);
-            }
+//            for (int i = 0; i < fieldsNames.size(); i++) {
+//                sheet.autoSizeColumn(i);
+//            }
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             workbook.write(outputStream);
             return new ByteArrayInputStream(outputStream.toByteArray());
         }
     }
 
+
+
+
+
     @SneakyThrows
     public ByteArrayInputStream exportToExcelFile(List<Data> data) {
         if (data.size()==0) throw new InvalidObjectException("The exported List of objects is empty");
-        try (Workbook workbook = new XSSFWorkbook()) {
+        else if (data.size() > 1048575) throw new IllegalArgumentException("XLSX format supports maximum 1048576 values");
+        try (Workbook workbook = new SXSSFWorkbook()) {
             Sheet sheet = workbook.createSheet(EVENT_SHEET_TITLE);
 
             Row row = sheet.createRow(0);
@@ -93,20 +128,37 @@ public class XlsxExportService<Data> {
             headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             headerCellStyle.setFont(font);
 
-            var fieldsNames = Arrays.stream(data.get(0).getClass().getDeclaredFields()).collect(Collectors.toList());
-            int fieldsNumber = data.get(0).getClass().getDeclaredFields().length;
-            for (int i = 0; i < fieldsNumber; i++) {
+//            var fieldsNames = Arrays.stream(data.get(0).getClass().getDeclaredFields()).collect(Collectors.toList());
+            List<Field> fieldsNames = new LinkedList<>();
+            Class<?> current = data.get(0).getClass();
+            while(current.getSuperclass()!=null){
+                fieldsNames.addAll(Arrays.asList(current.getDeclaredFields()));
+                current = current.getSuperclass();
+            }
+
+            for (int i = 0; i < fieldsNames.size(); i++) {
                 row.createCell(i);
                 row.getCell(i).setCellValue(firstUpperCase(fieldsNames.get(i).getName()));
                 row.getCell(i).setCellStyle(headerCellStyle);;
             }
-            //todo outOfMemory
+
+            Workbook sizeSetterBook = new XSSFWorkbook();
+            List<Field> fieldList = new ArrayList<>();
+
             for (int i = 0; i < data.size(); i++) {
                 Row dataRow = sheet.createRow(i + 1);
-                for (int y = 0; y < fieldsNumber; y++) {
+                for (int y = 0; y < fieldsNames.size(); y++) {
                     dataRow.createCell(y);
-                    String fieldNameForSearch = fieldsNames.get(y).getName();
-                    var field = data.get(i).getClass().getDeclaredField(fieldNameForSearch);
+                    var fieldNameForSearch = fieldsNames.get(y);
+
+                    Class<?> classWhereFindField = data.get(i).getClass();
+                    while(classWhereFindField.getSuperclass()!=null){
+                        fieldList.addAll(Arrays.asList(classWhereFindField.getDeclaredFields()));
+                        classWhereFindField = classWhereFindField.getSuperclass();
+                    }
+
+                    var field = fieldList.get(fieldList.indexOf(fieldNameForSearch));
+
                     field.setAccessible(true);
                     var value = field.get(data.get(i));
                     if (value instanceof Number) {
@@ -120,12 +172,12 @@ public class XlsxExportService<Data> {
                     } else if (value instanceof LocalDate) {
                         dataRow.getCell(y).setCellValue(((LocalDate) value).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
                     } else dataRow.getCell(y).setCellValue(value.toString());
+                    fieldList.clear();
                 }
             }
-            for (int i = 0; i < fieldsNumber; i++) {
-                sheet.autoSizeColumn(i);
-            }
-            System.out.println("Записываю... " + System.currentTimeMillis());
+//            for (int i = 0; i < fieldsNumber; i++) {
+//                sheet.autoSizeColumn(i);
+//            }
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             workbook.write(outputStream);
             return new ByteArrayInputStream(outputStream.toByteArray());
@@ -133,8 +185,13 @@ public class XlsxExportService<Data> {
     }
 
     private Field getField(String columnName) throws NoSuchFieldException {
-        var fieldStream = Arrays.stream(this.object.getClass().getDeclaredFields());
-        var optionalField = fieldStream.filter(p -> Objects.equals(p.getName(), columnName)).findFirst();
+        List<Field> fieldList = new ArrayList<>();
+        Class<?> classWhereFindField = object.getClass();
+        while(classWhereFindField.getSuperclass()!=null){
+            fieldList.addAll(Arrays.asList(classWhereFindField.getDeclaredFields()));
+            classWhereFindField = classWhereFindField.getSuperclass();
+        }
+        var optionalField = fieldList.stream().filter(p -> Objects.equals(p.getName(), columnName)).findFirst();
         if (optionalField.isEmpty()) {
             throw new NoSuchFieldException(String.format("Metadata field \"%s\" not found in the exported object", columnName));
         }

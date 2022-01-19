@@ -30,14 +30,18 @@ public class CsvExportService<Data> {
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             OutputStreamWriter sw = new OutputStreamWriter(byteArrayOutputStream);
-
+            List<Field> fieldList = new ArrayList<>();
             for (int i = 0; i < data.size(); i++) {
                 StringBuffer s = new StringBuffer("");
                 for (int y = 0; y < fieldsNames.size(); y++) {
-                    String fieldNameForSearch = fieldsNames.get(y).getName();
+                    var fieldNameForSearch = fieldsNames.get(y);
+                    Class<?> classWhereFindField = data.get(i).getClass();
+                    while(classWhereFindField.getSuperclass()!=null){
+                        fieldList.addAll(Arrays.asList(classWhereFindField.getDeclaredFields()));
+                        classWhereFindField = classWhereFindField.getSuperclass();
+                    }
                     Field field = null;
-
-                    field = data.get(i).getClass().getDeclaredField(fieldNameForSearch);
+                    field = fieldList.get(fieldList.indexOf(fieldNameForSearch));
                     field.setAccessible(true);
                     var value = field.get(data.get(i));
                     if (value instanceof Double || value instanceof Float) {
@@ -55,35 +59,43 @@ public class CsvExportService<Data> {
                     } else if (value instanceof LocalDate) {
                         s.append(((LocalDate) value).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))).append(separator);
                     } else s.append(value.toString()).append(separator);
+                    fieldList.clear();
                 }
                 if (i < data.size()) s.append("\n");
                 sw.write(s.toString());
                 sw.flush();
             }
             return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-        } catch (NoSuchFieldException | IOException | IllegalAccessException e){
+        } catch (IOException | IllegalAccessException e){
             log.error(e.getMessage(), e);
             e.printStackTrace();
             return new ByteArrayInputStream(new byte[0]);
         }
     }
 
-
     public ByteArrayInputStream exportToCsvFile(List<Data> data, Map<String, String> metadata) throws InvalidObjectException {
         if (data.size() == 0) throw new InvalidObjectException("The exported List of objects is empty");
         object = data.get(0);
-        List<Field> fieldsNames = new ArrayList<>();
+
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             OutputStreamWriter sw = new OutputStreamWriter(byteArrayOutputStream);
+            List<Field> fieldList = new ArrayList<>();
+            List<Field> fieldsNames = new ArrayList<>();
             for (String s : metadata.keySet()) {
                 fieldsNames.add(getField(s));
             }
+
             for (int i = 0, z = 0; i < data.size(); i++, z++) {
                 StringBuffer s = new StringBuffer("");
                 for (int y = 0; y < fieldsNames.size(); y++) {
-                    String fieldNameForSearch = fieldsNames.get(y).getName();
-                    var field = data.get(i).getClass().getDeclaredField(fieldNameForSearch);
+                    var fieldNameForSearch = fieldsNames.get(y);
+                    Class<?> classWhereFindField = data.get(i).getClass();
+                    while(classWhereFindField.getSuperclass()!=null){
+                        fieldList.addAll(Arrays.asList(classWhereFindField.getDeclaredFields()));
+                        classWhereFindField = classWhereFindField.getSuperclass();
+                    }
+                    var field = fieldList.get(fieldList.indexOf(fieldNameForSearch));
                     field.setAccessible(true);
                     var value = field.get(data.get(i));
                     if (value instanceof Double || value instanceof Float) {
@@ -115,8 +127,13 @@ public class CsvExportService<Data> {
     }
 
     private Field getField(String columnName) throws NoSuchFieldException {
-        var fieldStream = Arrays.stream(this.object.getClass().getDeclaredFields());
-        var optionalField = fieldStream.filter(p -> Objects.equals(p.getName(), columnName)).findFirst();
+        List<Field> fieldList = new ArrayList<>();
+        Class<?> classWhereFindField = object.getClass();
+        while(classWhereFindField.getSuperclass()!=null){
+            fieldList.addAll(Arrays.asList(classWhereFindField.getDeclaredFields()));
+            classWhereFindField = classWhereFindField.getSuperclass();
+        }
+        var optionalField = fieldList.stream().filter(p -> Objects.equals(p.getName(), columnName)).findFirst();
         if (optionalField.isEmpty()) {
             throw new NoSuchFieldException(String.format("Metadata field \"%s\" not found in the exported object", columnName));
         }
