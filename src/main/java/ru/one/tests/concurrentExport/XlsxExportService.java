@@ -1,5 +1,7 @@
 package ru.one.tests.concurrentExport;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import lombok.SneakyThrows;
@@ -25,19 +27,25 @@ public class XlsxExportService<Data> {
     public XlsxExportService() throws FileNotFoundException {
     }
 
-    public ByteArrayInputStream exportToExcelFileJson(List<Data> data, Map<String, String> metadata) throws InvalidObjectException {
+    public ByteArrayInputStream exportToExcelFileJson(List<Data> data, Map<String, String> metadata) throws InvalidObjectException, JsonProcessingException {
         if (data.size()==0) throw new InvalidObjectException("The exported List of objects is empty");
         else if (data.size() > 1048574) throw new IllegalArgumentException("XLSX format supports maximum 1048575 values, use CSV method");
         object = data.get(0);
-        Set set = metadata.keySet();
-        String one = (String)set.iterator().next();
-        System.out.println(one);
+        Set<String> set = metadata.keySet();
+        List<String> one = new ArrayList<>(set);
 
-        DocumentContext jsonContext = JsonPath.parse(object);
-        System.out.println(jsonContext);
-        int i = 0;
-        var jsonpathCreatorName = jsonContext.read("$.*");
-        System.out.println(jsonpathCreatorName);
+//        DocumentContext jsonContext = JsonPath.parse(object);
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(object);
+        DocumentContext jsonContext = JsonPath.parse(json);
+        System.out.println(json.toString());
+        System.out.println("////////////////");
+        int i = 1;
+//        var jsonpathCreatorName = jsonContext.read(one);
+//        var jsonpathCreatorName = jsonContext.read("$.[" +  i + "]");
+        System.out.println(jsonContext.read(one.get(0)).toString());
+        System.out.println(jsonContext.read(one.get(1)).toString());
+        System.out.println(jsonContext.read(one.get(2)).toString());
 
 
 
@@ -108,10 +116,6 @@ public class XlsxExportService<Data> {
             return new ByteArrayInputStream(outputStream.toByteArray());
         }
     }
-
-
-
-
 
     @SneakyThrows
     public ByteArrayInputStream exportToExcelFile(List<Data> data) {

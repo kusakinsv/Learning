@@ -56,9 +56,9 @@ public class TestExport {
         System.out.println("На добавление " + time1);
 
         LinkedHashMap<String, String> metadataJsonPath = new LinkedHashMap<>(){{
-            put("$.car.model", "MODEL");
-            put("$.car.price", "PRICE");
-            put("$.car.gears[2].size", "Фамилия");
+            put("$.model", "MODEL");
+            put("$.price", "PRICE");
+            put("$.gears[2].size", "Фамилия");
 //            put("hello", "Зарплата");
         }};
 
