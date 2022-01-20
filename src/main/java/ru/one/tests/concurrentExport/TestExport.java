@@ -25,19 +25,19 @@ public class TestExport {
         Faker faker = new Faker();
         long time = System.currentTimeMillis();
         //////////////////////////////////////////////
-        List<Gear> gears = new ArrayList<>();
-        for (int i = 0; i < 8; i++) {
-            gears.add(new Gear(faker.number().numberBetween(1, 10), new String[] { faker.color().name(), faker.color().name(), faker.color().name(), faker.color().name() }));
-        }
-        List<Car> cars = new ArrayList<>(){{
-            add(new Car("Tesla", 10000000, gears));
-            add(new Car("Mazda", 2000000, gears));
-            add(new Car("Audi", 45000000, gears));
-            add(new Car("Honda", 2800000, gears));
-            add(new Car("Toyota", 2000000, gears));
-            add(new Car("Hyndai", 1600000, gears));
-            add(new Car("BMW", 6000000, gears));
-        }};
+//        List<Gear> gears = new ArrayList<>();
+//        for (int i = 0; i < 8; i++) {
+//            gears.add(new Gear(faker.number().numberBetween(1, 10), new String[] { faker.color().name(), faker.color().name(), faker.color().name(), faker.color().name() }));
+//        }
+//        List<Car> cars = new ArrayList<>(){{
+//            add(new Car("Tesla", 10000000, gears));
+//            add(new Car("Mazda", 2000000, gears));
+//            add(new Car("Audi", 45000000, gears));
+//            add(new Car("Honda", 2800000, gears));
+//            add(new Car("Toyota", 2000000, gears));
+//            add(new Car("Hyndai", 1600000, gears));
+//            add(new Car("BMW", 6000000, gears));
+//        }};
 
         List<DataTwo> two = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
@@ -55,16 +55,16 @@ public class TestExport {
         long time1 = System.currentTimeMillis()-time;
         System.out.println("На добавление " + time1);
 
-        LinkedHashMap<String, String> metadataJsonPath = new LinkedHashMap<>(){{
-            put("$.model", "MODEL");
-            put("$.price", "PRICE");
-            put("$.gears[2].size", "Размер");
-            put("$.hello", "Что-то");
-            put("$.superOne", "Числа");
-            put("$.date", "Дата");
-//            put("$.hello", "HELLO");
-//            put("hello", "Зарплата");
-        }};
+//        LinkedHashMap<String, String> metadataJsonPath = new LinkedHashMap<>(){{
+//            put("$.model", "MODEL");
+//            put("$.price", "PRICE");
+//            put("$.gears[2].size", "Размер");
+//            put("$.hello", "Что-то");
+//            put("$.superOne", "Числа");
+//            put("$.date", "Дата");
+////            put("$.hello", "HELLO");
+////            put("hello", "Зарплата");
+//        }};
         LinkedHashMap<String, String> metadataJsonPath2 = new LinkedHashMap<>(){{
             put("$.id", "ID");
             put("$.name", "Имя");
@@ -72,8 +72,6 @@ public class TestExport {
             put("$.number", "Номер");
             put("$.date", "Дата");
         }};
-
-
 
 
 //        CsvExportService csvExportService = new CsvExportService();

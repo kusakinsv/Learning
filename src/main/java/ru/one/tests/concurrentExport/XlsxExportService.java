@@ -11,6 +11,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -50,27 +51,12 @@ public class XlsxExportService<T> {
             List<String> requiredColumns = new ArrayList<>(metadata.keySet());
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(new JavaTimeModule());
-//            mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-//            System.out.println("Columns: " + requiredColumns.size());
-////            String objectConverted = mapper.writeValueAsString(data.get(0));
-//            String objectConverted = mapper.writeValueAsString(data.get(0));
-//            System.out.println(objectConverted);
-//            System.out.println();
-////            var parentClass = data.get(0).getClass();
-//            Class<?> cl = data.get(0).getClass();
-//            cl = cl.getSuperclass();
-//            String objectConverted2 = mapper.writeValueAsString(cl);
-
-
-//            System.out.println(objectConverted2);
-//            var fieldsNames = Arrays.stream(data.get(0).getClass().getDeclaredFields()).collect(Collectors.toList());
 
             for (int i = 0; i < requiredColumns.size(); i++) {
                 row.createCell(i);
                 row.getCell(i).setCellValue(firstUpperCase(metadata.get(requiredColumns.get(i))));
                 row.getCell(i).setCellStyle(headerCellStyle);
             }
-
 
             for (int i = 0, z = 0; i < data.size(); i++, z++) {
                 Row dataRow = sheet.createRow(i + 1);
@@ -85,11 +71,12 @@ public class XlsxExportService<T> {
                         dataRow.getCell(y).setCellValue((String) value);
                     } else if (value instanceof Boolean) {
                         dataRow.getCell(y).setCellValue((Boolean) value);
-                    } else if (value instanceof LocalDateTime) {
-                        dataRow.getCell(y).setCellValue(((LocalDateTime) value).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")));
-                    } else if (value instanceof LocalDate) {
-                        dataRow.getCell(y).setCellValue(((LocalDate) value).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
-                    } else dataRow.getCell(y).setCellValue(value.toString());
+                    } else if (mapper.readValue(value.toString(), LocalDateTime.class) instanceof LocalDateTime) {
+                        dataRow.getCell(y).setCellValue((mapper.readValue(value.toString(), LocalDateTime.class)).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")));
+                    } else if (mapper.readValue(value.toString(), LocalDate.class) instanceof LocalDate) {
+                        dataRow.getCell(y).setCellValue((mapper.readValue(value.toString(), LocalDate.class)).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                    } else {
+                        dataRow.getCell(y).setCellValue(value.toString());}
                     fieldList.clear();
                 }
             }
