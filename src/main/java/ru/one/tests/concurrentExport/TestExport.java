@@ -17,34 +17,33 @@ import java.util.List;
 public class TestExport {
     public static void main(String[] args) throws IOException, NoSuchFieldException, IllegalAccessException {
         Path applicationPath = Paths.get("").toAbsolutePath();
-        String outputFilePath =  applicationPath + "\\export-service\\output\\textExport.csv";
+//        String outputFilePath =  applicationPath + "\\export-service\\output\\textExport.csv";
+        String outputFilePath =  applicationPath + "\\export-service\\output\\textExport.xlsx";
 //        ApplicationContext context = new AnnotationConfigApplicationContext(ExportServiceConfig.class);
 //        OutputStream os = new FileOutputStream("C:\\Coding\\IBS\\Components\\ibs-data-export\\textExport.xlsx"); //дома
         OutputStream os2 = new FileOutputStream(outputFilePath); //дома
         Faker faker = new Faker();
         long time = System.currentTimeMillis();
         //////////////////////////////////////////////
-        List<Gear> gears = new ArrayList<>(){{
-            add(new Gear(1, new String[] { "RED", "BLUE", "GREEN", "BLACK" }));
-            add(new Gear(8, new String[] { "RED", "BLUE", "GREEN", "BLACK" }));
-            add(new Gear(3, new String[] { "RED", "BLUE", "GREEN", "BLACK" }));
-            add(new Gear(6, new String[] { "RED", "BLUE", "GREEN", "BLACK" }));
-        }};
+        List<Gear> gears = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            gears.add(new Gear(faker.number().numberBetween(1, 10), new String[] { faker.color().name(), faker.color().name(), faker.color().name(), faker.color().name() }));
+        }
         List<Car> cars = new ArrayList<>(){{
-            add(new Car("BMW", 6000000, gears));
             add(new Car("Tesla", 10000000, gears));
             add(new Car("Mazda", 2000000, gears));
             add(new Car("Audi", 45000000, gears));
             add(new Car("Honda", 2800000, gears));
             add(new Car("Toyota", 2000000, gears));
             add(new Car("Hyndai", 1600000, gears));
+            add(new Car("BMW", 6000000, gears));
         }};
 
         List<DataTwo> two = new ArrayList<>();
-//        for (int i = 0; i < 1000000; i++) {
-////            one.add(new DataOne((long) i+1, faker.name().fullName(), Double.parseDouble(faker.commerce().price(30000.00, 200000.00).replace(',', '.'))));
+//        for (int i = 0; i < 100; i++) {
 //            two.add(new DataTwo(i+1, faker.name().firstName(), faker.name().lastName(), faker.address().fullAddress(), Double.parseDouble(faker.commerce().price(30000.00, 200000.00).replace(',', '.')), OffsetDateTime.now().toLocalDateTime()));
 //        }
+
         LinkedHashMap<String, String> metadata = new LinkedHashMap<>(){{
             put("id", "ID");
             put("name", "Имя");
@@ -58,7 +57,10 @@ public class TestExport {
         LinkedHashMap<String, String> metadataJsonPath = new LinkedHashMap<>(){{
             put("$.model", "MODEL");
             put("$.price", "PRICE");
-            put("$.gears[2].size", "Фамилия");
+            put("$.gears[2].size", "Размер");
+            put("$.hello", "Mark");
+            put("$.superOne", "Mark");
+//            put("$.hello", "HELLO");
 //            put("hello", "Зарплата");
         }};
 
@@ -70,6 +72,9 @@ public class TestExport {
 //        XlsxExportServiceTestFunc exportServiceTestFunc = new XlsxExportServiceTestFunc();
         XlsxExportService xlsxExportService = new XlsxExportService();
         os2.write(xlsxExportService.exportToExcelFileJson(cars, metadataJsonPath).readAllBytes());;
+
+//        os2.write(xlsxExportService.exportToExcelFile(two).readAllBytes());;
+
         time = System.currentTimeMillis()-time-time1;
         System.out.println("На запись " + time);
 //        System.out.println(System.currentTimeMillis());

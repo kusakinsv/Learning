@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 @ToString
 @AllArgsConstructor
-public class Car {
+public class Car extends Automobile{
     private String model;
     private int price;
     private List<Gear> gears;
