@@ -40,15 +40,16 @@ public class TestExport {
         }};
 
         List<DataTwo> two = new ArrayList<>();
-//        for (int i = 0; i < 100; i++) {
-//            two.add(new DataTwo(i+1, faker.name().firstName(), faker.name().lastName(), faker.address().fullAddress(), Double.parseDouble(faker.commerce().price(30000.00, 200000.00).replace(',', '.')), OffsetDateTime.now().toLocalDateTime()));
-//        }
+        for (int i = 0; i < 100; i++) {
+            two.add(new DataTwo(i+1, faker.name().firstName(), faker.name().lastName(), faker.address().fullAddress(), Double.parseDouble(faker.commerce().price(30000.00, 200000.00).replace(',', '.')), OffsetDateTime.now().toLocalDateTime()));
+        }
 
         LinkedHashMap<String, String> metadata = new LinkedHashMap<>(){{
             put("id", "ID");
             put("name", "Имя");
             put("surname", "Фамилия");
             put("hello", "Зарплата");
+            put("date", ":Дата");
         }};
         ///////////////////////
         long time1 = System.currentTimeMillis()-time;
@@ -58,10 +59,18 @@ public class TestExport {
             put("$.model", "MODEL");
             put("$.price", "PRICE");
             put("$.gears[2].size", "Размер");
-            put("$.hello", "Mark");
-            put("$.superOne", "Mark");
+            put("$.hello", "Что-то");
+            put("$.superOne", "Числа");
+            put("$.date", "Дата");
 //            put("$.hello", "HELLO");
 //            put("hello", "Зарплата");
+        }};
+        LinkedHashMap<String, String> metadataJsonPath2 = new LinkedHashMap<>(){{
+            put("$.id", "ID");
+            put("$.name", "Имя");
+            put("$.hello", "что-то");
+            put("$.number", "Номер");
+            put("$.date", "Дата");
         }};
 
 
@@ -71,7 +80,8 @@ public class TestExport {
 //        os2.write(csvExportService.exportToCsvFileJson(two, metadata).readAllBytes());
 //        XlsxExportServiceTestFunc exportServiceTestFunc = new XlsxExportServiceTestFunc();
         XlsxExportService xlsxExportService = new XlsxExportService();
-        os2.write(xlsxExportService.exportToExcelFileJson(cars, metadataJsonPath).readAllBytes());;
+//        os2.write(xlsxExportService.exportToExcelFileJson(cars, metadataJsonPath).readAllBytes());;
+        os2.write(xlsxExportService.exportToExcelFileJson(two, metadataJsonPath2).readAllBytes());;
 
 //        os2.write(xlsxExportService.exportToExcelFile(two).readAllBytes());;
 

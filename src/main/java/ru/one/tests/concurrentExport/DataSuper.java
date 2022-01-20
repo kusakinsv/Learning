@@ -8,11 +8,11 @@ import lombok.Setter;
 @Getter
 public class DataSuper {
     private String hello = "HELLO";
-    private int superOne = 1111;
+    private int number = 1111;
 
     DataSuper(){
         Faker faker = new Faker();
         this.hello = faker.beer().name();
-        this.superOne = faker.number().numberBetween(100, 500);
+        this.number = faker.number().numberBetween(100, 500);
     }
 }
