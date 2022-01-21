@@ -17,10 +17,10 @@ import java.util.List;
 public class TestExport {
     public static void main(String[] args) throws IOException, NoSuchFieldException, IllegalAccessException {
         Path applicationPath = Paths.get("").toAbsolutePath();
-//        String outputFilePath =  applicationPath + "\\export-service\\output\\textExport.csv";
+        String outputFilePathCSV =  applicationPath + "\\export-service\\output\\textExport.csv";
         String outputFilePath =  applicationPath + "\\export-service\\output\\textExport.xlsx";
 //        ApplicationContext context = new AnnotationConfigApplicationContext(ExportServiceConfig.class);
-//        OutputStream os = new FileOutputStream("C:\\Coding\\IBS\\Components\\ibs-data-export\\textExport.xlsx"); //дома
+        OutputStream os = new FileOutputStream(outputFilePathCSV); //дома
         OutputStream os2 = new FileOutputStream(outputFilePath); //дома
         Faker faker = new Faker();
         long time = System.currentTimeMillis();
@@ -49,37 +49,37 @@ public class TestExport {
             put("name", "Имя");
             put("surname", "Фамилия");
             put("hello", "Зарплата");
-            put("date", ":Дата");
+            put("date", "Дата");
         }};
         ///////////////////////
         long time1 = System.currentTimeMillis()-time;
         System.out.println("На добавление " + time1);
 
-//        LinkedHashMap<String, String> metadataJsonPath = new LinkedHashMap<>(){{
-//            put("$.model", "MODEL");
-//            put("$.price", "PRICE");
-//            put("$.gears[2].size", "Размер");
-//            put("$.hello", "Что-то");
-//            put("$.superOne", "Числа");
+        LinkedHashMap<String, String> metadataJsonPath = new LinkedHashMap<>(){{
+            put("$.model", "MODEL");
+            put("$.price", "PRICE");
+            put("gears[2].size", "Размер");
+            put("$.hello", "Что-то");
+            put("$.superOne", "Числа");
 //            put("$.date", "Дата");
-////            put("$.hello", "HELLO");
-////            put("hello", "Зарплата");
-//        }};
+//            put("$.hello", "HELLO");
+//            put("hello", "Зарплата");
+        }};
         LinkedHashMap<String, String> metadataJsonPath2 = new LinkedHashMap<>(){{
             put("$.id", "ID");
             put("$.name", "Имя");
-            put("$.hello", "что-то");
+            put("hello", "что-то");
             put("$.number", "Номер");
             put("$.date", "Дата");
         }};
 
 
-//        CsvExportService csvExportService = new CsvExportService();
-//        os2.write(csvExportService.exportToCsvFileJson(two, metadata).readAllBytes());
-//        XlsxExportServiceTestFunc exportServiceTestFunc = new XlsxExportServiceTestFunc();
-        XlsxExportService xlsxExportService = new XlsxExportService();
-//        os2.write(xlsxExportService.exportToExcelFileJson(cars, metadataJsonPath).readAllBytes());;
-        os2.write(xlsxExportService.exportToExcelFileJson(two, metadataJsonPath2).readAllBytes());;
+        CsvExportService csvExportService = new CsvExportService();
+        os.write(csvExportService.exportToCsvFileJson(two, metadata).readAllBytes());
+        XlsxExportServiceTestFunc exportServiceTestFunc = new XlsxExportServiceTestFunc();
+        os2.write(exportServiceTestFunc.exportToExcelFile(two).readAllBytes());;
+//        XlsxExportService xlsxExportService = new XlsxExportService();
+//        os2.write(xlsxExportService.exportToExcelFileJson(two, metadataJsonPath).readAllBytes());;
 
 //        os2.write(xlsxExportService.exportToExcelFile(two).readAllBytes());;
 
