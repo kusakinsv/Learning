@@ -40,7 +40,7 @@ public class TestExport {
 //        }};
 
         List<DataTwo> two = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 15; i++) {
             two.add(new DataTwo(i+1, faker.name().firstName(), faker.name().lastName(), faker.address().fullAddress(), Double.parseDouble(faker.commerce().price(30000.00, 200000.00).replace(',', '.')), OffsetDateTime.now().toLocalDateTime()));
         }
 
@@ -69,15 +69,15 @@ public class TestExport {
             put("$.id", "ID");
             put("$.name", "Имя");
             put("hello", "что-то");
-            put("$.number", "Номер");
+            put("$.adress", "Адрес");
             put("$.date", "Дата");
         }};
 
 
-        CsvExportService csvExportService = new CsvExportService();
-        os.write(csvExportService.exportToCsvFileJson(two, metadata).readAllBytes());
+//        CsvExportService csvExportService = new CsvExportService();
+//        os.write(csvExportService.exportToCsvFileJson(two, metadata).readAllBytes());
         XlsxExportServiceTestFunc exportServiceTestFunc = new XlsxExportServiceTestFunc();
-        os2.write(exportServiceTestFunc.exportToExcelFile(two).readAllBytes());;
+        os2.write(exportServiceTestFunc.exportToExcelFile(two, metadataJsonPath2).readAllBytes());;
 //        XlsxExportService xlsxExportService = new XlsxExportService();
 //        os2.write(xlsxExportService.exportToExcelFileJson(two, metadataJsonPath).readAllBytes());;
 
