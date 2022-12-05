@@ -1,4 +1,4 @@
-package ru.one.tests.strings.serchers;
+package ru.one.testapps.stringserchers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
