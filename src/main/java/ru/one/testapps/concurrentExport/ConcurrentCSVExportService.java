@@ -1,4 +1,4 @@
-package ru.one.tests.concurrentExport;
+package ru.one.testapps.concurrentExport;
 
 import lombok.SneakyThrows;
 import org.apache.poi.ss.usermodel.Row;

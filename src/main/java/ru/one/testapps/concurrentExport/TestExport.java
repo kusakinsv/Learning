@@ -1,8 +1,6 @@
-package ru.one.tests.concurrentExport;
+package ru.one.testapps.concurrentExport;
 
 import com.github.javafaker.Faker;
-import ru.one.tests.concurrentExport.model.Car;
-import ru.one.tests.concurrentExport.model.Gear;
 
 import java.io.FileOutputStream;
 import java.io.IOException;

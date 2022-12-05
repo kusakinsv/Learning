@@ -1,4 +1,4 @@
-package ru.one.tests.concurrentExport.model;
+package ru.one.testapps.concurrentExport.model;
 
 import com.github.javafaker.Faker;
 

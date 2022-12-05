@@ -1,4 +1,4 @@
-package ru.one.tests.roundprice;
+package ru.one.tests.i1.roundprice;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

@@ -1,4 +1,4 @@
-package ru.one.tests.concurrentExport;
+package ru.one.testapps.concurrentExport;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

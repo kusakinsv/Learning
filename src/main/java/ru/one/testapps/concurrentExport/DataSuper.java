@@ -1,4 +1,4 @@
-package ru.one.tests.concurrentExport;
+package ru.one.testapps.concurrentExport;
 
 import com.github.javafaker.Faker;
 import lombok.Getter;
