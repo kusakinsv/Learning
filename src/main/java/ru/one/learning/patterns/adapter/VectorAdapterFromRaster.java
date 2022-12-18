@@ -1,6 +1,6 @@
 package ru.one.learning.patterns.adapter;
 
-public class VectorAdapterFromRustler extends RasterGraphics implements VectorGraphics {
+public class VectorAdapterFromRaster extends RasterGraphics implements VectorGraphics {
 
     @Override
     public void drawLine() {
