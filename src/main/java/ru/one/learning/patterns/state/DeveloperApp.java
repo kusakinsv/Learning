@@ -1,6 +1,6 @@
 package ru.one.learning.patterns.state;
 
-public class DeveloperDay {
+public class DeveloperApp { //Состояние
     public static void main(String[] args) {
         Activity activity = new Sleeping();
         Developer developer = new Developer();
@@ -10,6 +10,5 @@ public class DeveloperDay {
         developer.justDoIt();
         developer.changeActivity();
         }
-
     }
 }

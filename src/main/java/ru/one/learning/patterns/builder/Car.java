@@ -9,17 +9,17 @@ public class Car {
     @Setter private String mark;
     @Setter private Transmission transmission;
     @Setter private Engine engine;
-    @Setter int speed;
+    @Setter private int speed;
 
     public static CarBuilder toBuilder(){
         return new CarBuilder();
     }
 
     static class CarBuilder{
-        private String mark;
-        private Transmission transmission;
-        private Engine engine;
-        int speed;
+        private String mark = "Some Auto";
+        private Transmission transmission = Transmission.MANUAL;
+        private Engine engine = Engine.PETROL;
+        private int speed = 80;
 
        Car build(){
            Car car = new Car();
